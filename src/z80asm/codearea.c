@@ -1,7 +1,7 @@
 /*
 Z88DK Z80 Module Assembler
 
-Copyright (C) Paulo Custodio, 2011-2017
+Copyright (C) Paulo Custodio, 2011-2019
 License: The Artistic License 2.0, http://www.perlfoundation.org/artistic_license_2_0
 Repository: https://github.com/z88dk/z88dk
 
@@ -613,6 +613,10 @@ void fwrite_codearea(const char *filename, FILE **pbinfile, FILE **prelocfile)
 						Str_append(new_name, section->name);
 
                         xfclose_remove_empty(*pbinfile);
+
+						if (opts.verbose)
+							printf("Creating binary '%s'\n", path_canon(get_bin_filename(Str_data(new_name))));
+
 						*pbinfile = xfopen(get_bin_filename(Str_data(new_name)), "wb");
 
 						if (*prelocfile) {

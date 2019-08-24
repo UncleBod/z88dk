@@ -70,6 +70,10 @@
 #define psgT(hz)		((int)(125000.0 / (hz)))
 #endif
 
+#ifdef __GAL__
+#define psgT(hz)		((int)(1536000.0 / (hz)))
+#endif
+
 #ifdef __MC1000__
 // CPU clock: 3.57 mhz, let's divide by 32
 #define psgT(hz)		((int)(111562.5 / (hz)))
@@ -93,6 +97,17 @@
 #ifdef __PC6001__
 // 3.8 Mhz on earlier models, 4Mhz on next ones
 #define psgT(hz)		((int)(118750.0 / (hz)))
+#endif
+
+#ifdef __PASOPIA7__
+// 1996800 / 16 ?
+#define psgT(hz)		((int)(125000.0 / (hz)))
+#endif
+
+#ifdef __PC88__
+// 3.9936 Mhz, but is sounded bad when split as suggested.
+//   This value was chosen by trial and error.
+#define psgT(hz)		((int)(74000.0 / (hz)))
 #endif
 
 #ifdef __SVI__

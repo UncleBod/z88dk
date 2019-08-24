@@ -12,8 +12,6 @@ stdio/lynx/CRT_FONT
 @stdio/stdio.lst
 graphics/dcircle
 graphics/clg
-graphics/clrarea
-graphics/lftscrol
 graphics/lynx/textpixl
 graphics/generic_console/clsgraph
 graphics/generic_console/plotpixl
@@ -23,8 +21,10 @@ graphics/generic_console/pointxy
 graphics/generic_console/getmaxx
 graphics/generic_console/getmaxy
 graphics/putsprite3
-graphics/liner
 graphics/stencil_render2
 graphics/text/swapgfxbk
 @gfxbase.lst
+@video/mc6845/mc6845.lst
+games/lynx/keys_joystick
+@games/games.lst
 @z80.lst

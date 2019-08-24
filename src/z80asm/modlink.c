@@ -2,9 +2,9 @@
 Z88DK Z80 Macro Assembler
 
 Copyright (C) Gunther Strube, InterLogic 1993-99
-Copyright (C) Paulo Custodio, 2011-2017
+Copyright (C) Paulo Custodio, 2011-2019
 License: The Artistic License 2.0, http://www.perlfoundation.org/artistic_license_2_0
-Repository: https://github.com/pauloscustodio/z88dk-z80asm
+Repository: https://github.com/z88dk/z88dk
 */
 
 #include "alloc.h"
@@ -969,6 +969,9 @@ CreateBinFile( void )
         filename = get_bin_filename( get_first_module(NULL)->filename );		/* add '.bin' extension */
 
     /* binary output to filename.bin */
+	if (opts.verbose)
+		printf("Creating binary '%s'\n", path_canon(filename));
+
     binaryfile = xfopen( filename, "wb" );
 	inital_binaryfile = binaryfile;
 

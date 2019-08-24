@@ -38,7 +38,7 @@ ENDIF
 
 IF !DEFINED_CLIB_MALLOC_HEAP_SIZE 
 	defc	DEFINED_CLIB_MALLOC_HEAP_SIZE  = 1
-	defc CLIB_MALLOC_HEAP_SIZE  = 0x2000
+	defc CLIB_MALLOC_HEAP_SIZE  = 0x2700
 	IFNDEF CLIB_MALLOC_HEAP_SIZE 
 	ENDIF
 ENDIF
@@ -51,7 +51,7 @@ ENDIF
 IFNDEF startup
 
    ; startup undefined so select a default
-   
+
    defc startup = 0
 
 ENDIF
@@ -72,15 +72,15 @@ ENDIF
    ; yabios asci1 drivers installed on ttyin, ttyout, ttyerr
 
    IFNDEF __CRTCFG
-   
+
       defc __CRTCFG = 0
-   
+
    ENDIF
-   
+
    IFNDEF __MMAP
-   
+
       defc __MMAP = 0
-   
+
    ENDIF
 
    
@@ -364,8 +364,8 @@ ENDIF
       ENDIF
    
    ENDIF
-   
-   
+
+
    IFDEF CRT_ENABLE_COMMANDLINE_EX
    
       defc __crt_enable_commandline_ex = CRT_ENABLE_COMMANDLINE_EX
@@ -1767,6 +1767,7 @@ EXTERN _main
 IF __crt_include_preamble
 
    include "crt_preamble.asm"
+   SECTION CODE
 
 ENDIF
 
@@ -1794,13 +1795,13 @@ __Start:
 __Restart:
 
    include "../crt_init_sp.inc"
-   
+
    ; command line
-   
+
    IF (__crt_enable_commandline = 1) || (__crt_enable_commandline >= 3)
-   
+
       include "../crt_cmdline_empty.inc"
-   
+
    ENDIF
 
 __Restart_2:
@@ -1847,20 +1848,20 @@ SECTION code_crt_main
    ; run exit stack
 
    IF __clib_exit_stack_size > 0
-   
+
       EXTERN asm_exit
       jp asm_exit              ; exit function jumps to __Exit
-   
+
    ENDIF
 
 __Exit:
 
    IF !((__crt_on_exit & 0x10000) && (__crt_on_exit & 0x8))
-   
+
       ; not restarting
       
       push hl                  ; save return status
-   
+
    ENDIF
 
 SECTION code_crt_exit          ; user and library cleanup
@@ -1871,10 +1872,10 @@ SECTION code_crt_return
    include "../clib_close.inc"
 
    ; terminate
-   
+
    include "../crt_exit_eidi.inc"
    include "../crt_restore_sp.inc"
-   include "../crt_program_exit.inc"      
+   include "../crt_program_exit.inc"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; RUNTIME VARS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1902,6 +1903,12 @@ include "../clib_stubs.inc"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; app drivers;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; cp/m native console ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 

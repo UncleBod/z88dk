@@ -2,9 +2,9 @@
 
 # Z88DK Z80 Macro Assembler
 #
-# Copyright (C) Paulo Custodio, 2011-2017
+# Copyright (C) Paulo Custodio, 2011-2019
 # License: The Artistic License 2.0, http://www.perlfoundation.org/artistic_license_2_0
-# Repository: https://github.com/pauloscustodio/z88dk-z80asm
+# Repository: https://github.com/z88dk/z88dk
 #
 # Test assembly directives
 
@@ -112,12 +112,12 @@ z80asm(
 z80asm(
 	asm		=> " defb 1 ",
 	options	=> "-b --filler=-1",
-	error	=> "Error: invalid --filler option '-1'",
+	error	=> "Error: invalid filler value: -1",
 );
 z80asm(
 	asm		=> " defb 1 ",
 	options	=> "-b --filler=256",
-	error	=> "Error: invalid --filler option '256'",
+	error	=> "Error: invalid filler value: 256",
 );
 
 #------------------------------------------------------------------------------

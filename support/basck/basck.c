@@ -4,10 +4,23 @@
  *   This tool looks for known 'fingerprints' in the code and tries to identify
  *   function entry points and to provide a cross-reference for further ROM analysis.
  *
- *   It works with Sinclair, Microsoft or Hu-BASIC ROMs or raw datafiles (tape images, etc..), giving hints to 
+ *   It works with Sinclair, Microsoft or Hu-BASIC ROMs on raw datafiles (tape images, etc..), giving hints to 
  *   set-up a brand new target port or to just extend it with an alternative shortcuts (i.e. in the FP package).
  *
- *   $Id: basck.c - updated in 2018 $
+ *   $Id: basck.c $
+ *
+ *
+ *   Simpler way to adapt a Microsoft BASIC subroutine to z88dk:
+ *    > basck -map romfile.rom |grep PRS
+ *              PRS     = $AAAA   ; Create string entry and print it
+ *
+ *   extern void rom_prs(char * str) __z88dk_fastcall @0xAAAA;
+ *
+ *   main() {
+ *   rom_prs ("Hello WORLD !");
+ *   while (1){};
+ *   }
+ *
  */
 
 unsigned char  *img;
@@ -17,7 +30,8 @@ int  l;
 char token[1000];
 int address;
 
-/* For the SKOOL mode, refer to:  http://pythonhosted.org/skoolkit */
+/* For the SKOOL mode (disassembler), refer to:  http://skoolkit.ca/ */
+
 /* usage example in skool mode:
 		basck -ctl p2000.bin > p2000.ctl
 		---> we look into the created file and see:  "(Detected position for ORG:  4096)"
@@ -49,7 +63,6 @@ int SKOOLMODE = -1;
 #include <string.h>
 /* stdlib.h MUST be included to really open files as binary */
 #include <stdlib.h>
-#include <malloc.h>
 
 #define SKIP -1
 #define CATCH -2
@@ -256,9 +269,17 @@ int zxshadow_end[]={26, ADDR, 33, 0x38, 0x00, 0x22, 0x8D, 0x5C, 0x22, 0x8F, 0x5C
 
 
 
-/*****************************/
-/* Microsoft BASIC detection */
-/*****************************/
+/***********************************/
+/* Microsoft BASIC detection, 6502 */
+/***********************************/
+int msbas_6502_gosub[]={22, ADDR, 0xA9, 0x03, 0x20, SKIP, SKIP, 0xA5, SKIP, 0x48, 0xA5, SKIP, 0x48, 0xA5, SKIP, 0x48, 0xA5, SKIP, 0x48, 0xA9, SKIP, 0x48, 0x20};
+int msbas_6502_goto[]={21, ADDR, 0xA5, SKIP, 0xE5, SKIP, 0xA5, SKIP, 0xE5, SKIP,  0xB0, SKIP,      0x98, 0x38, 0x65, SKIP, 0xA6, SKIP, 0x90, SKIP, 0xE8, 0xB0};
+
+ 
+
+/********************************************/
+/* Microsoft BASIC detection, Intel & Zilog */
+/********************************************/
 
 int restore_bastxt_skel[]={14, 0xEB, 0x2A, CATCH, CATCH, 0x28, 0x0E, 0xEB, SKIP_CALL, 0xE5, SKIP_CALL, 0x60, 0x69, 0xD1, 0xD2};
 int microsoft_skel[]={9, CATCH, 'i', 'c', 'r', 'o', 's', 'o', 'f', 't'};
@@ -1037,6 +1058,21 @@ int main(int argc, char *argv[])
 	/***********************************/
 	/* Microsoft BASIC related section */
 	/***********************************/
+	
+	res=find_skel(msbas_6502_gosub);
+	if (res<0)
+		res=find_skel(msbas_6502_goto);
+	if (res>0) {
+		printf("\n# Microsoft AppleSoft/PET (6502) BASIC found\n");
+		brand=find_skel(microsoft_skel);
+		if (brand>0)
+			printf("#  Microsoft signature found\n");
+			else printf("#  Microsoft signature not found\n");
+		brand=find_skel(msbas_6502_goto);
+		if (brand>0)
+			printf("#  Extended BASIC detected\n");
+	}
+		
 	res=find_skel(restore_bastxt_skel);
 	if (res<0)
 		res=find_skel(bastxt_skel);

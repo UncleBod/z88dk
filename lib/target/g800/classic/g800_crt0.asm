@@ -36,7 +36,8 @@ ENDIF
         defc    CONSOLE_COLUMNS = 24
         defc    CONSOLE_ROWS = 4
 
-	defc	TAR__no_ansifont = 1
+	;defc	TAR__no_ansifont = 1
+
         defc    TAR__clib_exit_stack_size = 32
         defc    TAR__register_sp = -1
 	INCLUDE	"crt/classic/crt_rules.inc"
@@ -74,8 +75,6 @@ l_dcal: jp      (hl)            ;Used for function pointer calls
 
 
 
-	defm    "Small C+ G8xx"        ;Unnecessary file signature
-	defb    0
 
         INCLUDE "crt/classic/crt_runtime_selection.asm"
 

@@ -1,5 +1,5 @@
 
-   SECTION  code_clib
+			SECTION   smc_clib
 
 	PUBLIC	cleararea
 

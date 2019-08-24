@@ -8,6 +8,7 @@
 	EXTERN	textpixl
 	EXTERN	__console_w
 	EXTERN	__console_h
+	EXTERN	__gfx_coords
 
 
 		ld	a,(__console_w)
@@ -22,6 +23,7 @@
 		cp	l
 		ret	c
 
+		ld	(__gfx_coords),hl
 		push	bc		;save entry bc	
 		ld	c,h
 		ld	b,l
@@ -32,6 +34,7 @@
 IF USEplotc
 		call	generic_console_pointxy
 ELSE
+		ld	e,1		;raw mode
 		call	generic_console_vpeek
 ENDIF
 		ld	e,a
@@ -82,9 +85,11 @@ ELSE
 		ld	a,(hl)
 		pop	bc		;reduced coordinates
 IF USEplotc
+		ld	d,a
                 ld      e,0             ;pixel4 mode
                 call    generic_console_plotc
 ELSE
+		ld	d,a
 		ld	e,1		;raw mode
 		call	generic_console_printc
 ENDIF

@@ -8,9 +8,11 @@
 ; no need anymore of the row table, saving a lot of memory.
 ;
 ;
-; $Id: putsprite.asm,v 1.2 2017-01-02 22:57:59 aralbrec Exp $
+; $Id: putsprite.asm $
 ;
 
+	SECTION   smc_clib
+	
 	PUBLIC    putsprite
    PUBLIC    _putsprite
 	EXTERN	pixeladdress
@@ -26,13 +28,10 @@
 ; sprite: (ix)
 
 
-.offsets_table
-         defb	128,64,32,16,8,4,2,1
-
 .putsprite
 ._putsprite
-
-		ld      hl,2   
+	push	ix
+        ld      hl,4   
 		add     hl,sp
 		ld      e,(hl)
 		inc     hl
@@ -132,7 +131,7 @@
 
          pop      bc                ;Restore data
          djnz     _oloop
-         ;ei
+         pop	ix
          ret
 
 
@@ -183,7 +182,7 @@
 
          pop      bc                ;Restore data
          djnz     woloop
-         ;ei
+         pop	ix
          ret
 
 .wover_1 ld       c,(ix+2)
@@ -200,6 +199,10 @@
 
          pop      bc
          djnz     woloop
-         ;ei
+         pop	ix
          ret
 
+
+	SECTION rodata_clib
+.offsets_table
+         defb	128,64,32,16,8,4,2,1

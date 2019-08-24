@@ -20,6 +20,7 @@ static char             *crtfile      = NULL;
 static char             *outfile      = NULL;
 static int               origin       = -1;
 static char              fmsx         = 0;
+static char              disk         = 0;
 static char              audio        = 0;
 static char              fast         = 0;
 static char              dumb         = 0;
@@ -27,12 +28,12 @@ static char              loud         = 0;
 static char              help         = 0;
 
 static char              bit_state    = 0;
-static char              h_lvl;
-static char              l_lvl;
-static char              msx_h_lvl;
-static char              msx_l_lvl;
+static uint8_t           h_lvl;
+static uint8_t           l_lvl;
+static uint8_t           msx_h_lvl;
+static uint8_t           msx_l_lvl;
 
-static char   blockid[8] = { 0x1F, 0xA6, 0xDE, 0xBA, 0xCC, 0x13, 0x7D, 0x74 };
+static uint8_t blockid[8] = { 0x1F, 0xA6, 0xDE, 0xBA, 0xCC, 0x13, 0x7D, 0x74 };
 
 
 /* Options that are available for this module */
@@ -47,6 +48,7 @@ option_t msx_options[] = {
     {  0,  "fast",     "Tweak the audio tones to run a bit faster",  OPT_BOOL,  &fast },
     {  0,  "dumb",     "Just convert to WAV a tape file",  OPT_BOOL,  &dumb },
     {  0,  "loud",     "Louder audio volume",        OPT_BOOL,  &loud },
+    {  0,  "disk",     "Create an MSXDOS disc",      OPT_BOOL,  &disk },
     {  0,  NULL,       NULL,                         OPT_NONE,  NULL }
 };
 
@@ -229,6 +231,10 @@ int msx_exec(char* target)
         fclose(fpout);
     }
 
+    if ( disk ) {
+        return fat_write_file_to_image("msxbasic", "raw", NULL, filename, NULL, NULL);
+    }
+
     /* ***************************************** */
     /*  Now, if requested, create the audio file */
     /* ***************************************** */
@@ -310,3 +316,5 @@ int msx_exec(char* target)
 
     return 0;
 }
+
+

@@ -79,6 +79,52 @@
 
 
 
+#undef  __CPM
+#define __CPM       22
+
+#define __CPM_RCON  1
+#define __CPM_WCON  2
+#define __CPM_RRDR  3
+#define __CPM_WPUN  4
+#define __CPM_WLST  5
+#define __CPM_DCIO  6
+#define __CPM_GIOB  7
+#define __CPM_SIOB  8
+#define __CPM_PRST  9
+#define __CPM_RCOB  10
+#define __CPM_ICON  11
+#define __CPM_VERS  12
+#define __CPM_RDS   13
+#define __CPM_LGIN  14
+#define __CPM_OPN   15
+#define __CPM_CLS   16
+#define __CPM_FFST  17
+#define __CPM_FNXT  18
+#define __CPM_DEL   19
+#define __CPM_READ  20
+#define __CPM_WRIT  21
+#define __CPM_MAKE  22
+#define __CPM_REN   23
+#define __CPM_ILOG  24
+#define __CPM_IDRV  25
+#define __CPM_SDMA  26
+#define __CPM_SUID  32
+#define __CPM_RRAN  33
+#define __CPM_WRAN  34
+#define __CPM_CFS   35
+#define __CPM_DSEG  51
+
+
+
+
+
+
+
+
+
+
+
+
 #undef  __Z180
 #define __Z180  0x04
 
@@ -833,11 +879,11 @@
 
 
 
-#define __IO_I2C_RX_SIZE  68
-#define __IO_I2C_TX_SIZE  68
+#define __IO_I2C_RX_SIZE  256
+#define __IO_I2C_TX_SIZE  256
 
-#define __IO_PCA9665_1_PORT_BASE  0xA000
-#define __IO_PCA9665_2_PORT_BASE  0x8000
+#define __IO_I2C1_PORT_BASE  0xA000
+#define __IO_I2C2_PORT_BASE  0x8000
 
 #define __IO_I2C1_PORT_MSB  0xa0
 #define __IO_I2C2_PORT_MSB  0x80

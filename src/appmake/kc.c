@@ -42,8 +42,7 @@ int kc_exec(char* target)
     FILE* fpin;
     FILE* fpout;
     long pos;
-    char name[17];
-    int len, namelen;
+    int len;
     int c, i;
     int nflag;
     char* p;
@@ -70,8 +69,6 @@ int kc_exec(char* target)
     //
 
     suffix_change(filename, ".KCC");
-
-    namelen = strlen(filename) - 1;
 
     if (strcmp(binname, filename) == 0) {
         fprintf(stderr, "Input and output file names must be different\n");
@@ -143,6 +140,12 @@ int kc_exec(char* target)
     for (i = 0; i < len; i++) {
         c = getc(fpin);
         writebyte(c, fpout);
+    }
+
+    // Pad the block out to 128 bytes
+    while( (i % 128) > 0) {
+        writebyte(0, fpout);
+        i++;
     }
 
     fclose(fpin);

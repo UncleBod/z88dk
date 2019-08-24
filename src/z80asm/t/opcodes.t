@@ -9,7 +9,7 @@ BEGIN {
 };
 
 z80asm(
-    options => "-l -b --cpu=z80",
+    options => "-l -b -mz80",
     asm1 => <<'END_ASM',
         public ZERO
         defc ZERO    = 0
@@ -21,9 +21,9 @@ END_ASM
 ; Input data for tests, to be parsed by build_opcodes.pl
 ;
 ; Copyright (C) Gunther Strube, InterLogic 1993-99
-; Copyright (C) Paulo Custodio, 2011-2017
+; Copyright (C) Paulo Custodio, 2011-2019
 ; License: The Artistic License 2.0, http://www.perlfoundation.org/artistic_license_2_0
-; Repository: https://github.com/pauloscustodio/z88dk-z80asm
+; Repository: https://github.com/z88dk/z88dk
 ;------------------------------------------------------------------------------
 
         org  0100h
@@ -108,8 +108,8 @@ label_2: ld   a,3                       ;; 3E 03
 
         defw label_1, label_2           ;; 6D 01 6F 01
         defw ZERO+label_1               ;; 6D 01
-        defb #label_2-label_1           ;; 02
-        defb #ZERO+label_2-label_1      ;; 02
+        defb +label_2-label_1           ;; 02
+        defb +ZERO+label_2-label_1      ;; 02
 
         defb 255,128,0,-128             ;; FF 80 00 80
         defb ZERO+255,ZERO-128          ;; FF 80
@@ -2232,7 +2232,7 @@ ENDIF
 END_ASM
 );
 z80asm(
-    options => "-l -b --cpu=z80",
+    options => "-l -b -mz80",
     asm  => <<'END_ASM',
         ldx                             ;; error: syntax error
         ld                              ;; error: syntax error
@@ -2333,7 +2333,7 @@ ENDIF
 END_ASM
 );
 z80asm(
-    options => "-l -b --cpu=r2k -DRABBIT",
+    options => "-l -b -mr2k -DRABBIT",
     asm1 => <<'END_ASM',
         public ZERO
         defc ZERO    = 0
@@ -2345,9 +2345,9 @@ END_ASM
 ; Input data for tests, to be parsed by build_opcodes.pl
 ;
 ; Copyright (C) Gunther Strube, InterLogic 1993-99
-; Copyright (C) Paulo Custodio, 2011-2017
+; Copyright (C) Paulo Custodio, 2011-2019
 ; License: The Artistic License 2.0, http://www.perlfoundation.org/artistic_license_2_0
-; Repository: https://github.com/pauloscustodio/z88dk-z80asm
+; Repository: https://github.com/z88dk/z88dk
 ;------------------------------------------------------------------------------
 
         org  0100h
@@ -2432,8 +2432,8 @@ label_2: ld   a,3                       ;; 3E 03
 
         defw label_1, label_2           ;; 6D 01 6F 01
         defw ZERO+label_1               ;; 6D 01
-        defb #label_2-label_1           ;; 02
-        defb #ZERO+label_2-label_1      ;; 02
+        defb +label_2-label_1           ;; 02
+        defb +ZERO+label_2-label_1      ;; 02
 
         defb 255,128,0,-128             ;; FF 80 00 80
         defb ZERO+255,ZERO-128          ;; FF 80
@@ -4398,7 +4398,7 @@ ENDIF
 END_ASM
 );
 z80asm(
-    options => "-l -b --cpu=r2k -DRABBIT",
+    options => "-l -b -mr2k -DRABBIT",
     asm  => <<'END_ASM',
         ldx                             ;; error: syntax error
         ld                              ;; error: syntax error

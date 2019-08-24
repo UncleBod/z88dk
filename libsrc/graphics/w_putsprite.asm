@@ -6,16 +6,16 @@
 ; Generic high resolution version
 ;
 ;
-; $Id: w_putsprite.asm,v 1.8 2017-01-02 21:51:24 aralbrec Exp $
+; $Id: w_putsprite.asm $
 ;
 
-        SECTION code_clib
+        SECTION   smc_clib
         PUBLIC    putsprite
         PUBLIC    _putsprite
         EXTERN    w_pixeladdress
 
         EXTERN    swapgfxbk
-        EXTERN    swapgfxbk1
+        EXTERN    __graphics_end
 
         INCLUDE "graphics/grafix.inc"
 
@@ -23,14 +23,13 @@
 ; sprite: (ix)
 
 
-.offsets_table
-         defb   1,2,4,8,16,32,64,128
-
 
 .putsprite
 ._putsprite
         
-        ld      hl,2   
+		push ix
+		
+        ld      hl,4
         add     hl,sp
         ld      e,(hl)
         inc     hl
@@ -65,10 +64,7 @@
         ld      (oldx),hl
         ld      (cury),de
         call    w_pixeladdress
-        ; ------
-        ;ld		a,(hl)
-        ; @@@@@@@@@@@@
-         ld       c,a
+       ; @@@@@@@@@@@@
          ld       hl,offsets_table
          ld       c,a
          ld       b,0
@@ -141,7 +137,8 @@
         pop     de
          pop      bc                ;Restore data
          djnz     _oloop
-         jp       swapgfxbk1
+		 
+         jp       __graphics_end
 
 
 .putspritew
@@ -188,6 +185,8 @@
 
          djnz     wiloop
 
+.nextline
+
         push   de
         ;@@@@@@@@@@
         ;Go to next line
@@ -205,38 +204,28 @@
 
          pop      bc                ;Restore data
          djnz     woloop
-         jp       swapgfxbk1
+         jp       __graphics_end
         
 
 .wover_1 ld       c,(ix+2)
          inc      ix
          djnz     wiloop
          dec      ix
+		 
+		 jr nextline
 
-        push   de
-        ;@@@@@@@@@@
-        ;Go to next line
-        ;@@@@@@@@@@
-         ld      hl,(oldx)
-         ld      (curx),hl
-         ld      de,(cury)
-         inc     de
-         ld      (cury),de
-         call    w_pixeladdress
-         ld      h,d
-         ld      l,e
-        ;@@@@@@@@@@
-        pop     de
 
-         pop      bc
-         djnz     woloop
-         jp       swapgfxbk1
 
-	SECTION  bss_clib
+	SECTION  bss_graphics
 .oldx
          defw   0
 .curx
          defw   0
 .cury
          defw   0
+
+
+	SECTION	rodata_clib
+.offsets_table
+         defb   1,2,4,8,16,32,64,128
 

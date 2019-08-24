@@ -6,8 +6,6 @@
 ;       PX8 variant by Stefano Bodrato
 ;
 ;
-;	$Id: xordraw.asm - Stefano, 2017 $
-;
 
 
 		SECTION         code_clib
@@ -15,9 +13,11 @@
 		PUBLIC    xordraw
 		PUBLIC	  _xordraw
 		
-        EXTERN    draw
-		
+        EXTERN    do_draw
+
 
 .xordraw
 ._xordraw
-		jp draw
+		ld	a,3
+		jp do_draw
+		

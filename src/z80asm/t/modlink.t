@@ -3,9 +3,9 @@
 # Z88DK Z80 Macro Assembler
 #
 # Copyright (C) Gunther Strube, InterLogic 1993-99
-# Copyright (C) Paulo Custodio, 2011-2017
+# Copyright (C) Paulo Custodio, 2011-2019
 # License: The Artistic License 2.0, http://www.perlfoundation.org/artistic_license_2_0
-# Repository: https://github.com/pauloscustodio/z88dk-z80asm
+# Repository: https://github.com/z88dk/z88dk
 #
 # Test linking of modules
 
@@ -114,7 +114,7 @@ Object  file test1.o at $0000: Z80RMF12
     E Cw $0019 $001A: __size (section "") (file test1.asm:14)
 END
 
-eq_or_diff scalar(read_file("test.map")), <<'END';
+is_text( scalar(read_file("test.map")), <<'END' );
 a1                              = $1247 ; addr, public, , test, , test.asm:13
 a2                              = $1263 ; addr, public, , test1, , test1.asm:11
 __head                          = $1234 ; const, public, def, , ,
@@ -259,7 +259,7 @@ Object  file test1.o at $0000: Z80RMF12
     G A $0001 mes0end (section data) (file test1.asm:4)
 END
 
-eq_or_diff scalar(read_file("test.map")), <<'END';
+is_text( scalar(read_file("test.map")), <<'END' );
 mes1                            = $1259 ; addr, local, , test, data, test.asm:10
 start                           = $1234 ; addr, local, , test, code, test.asm:6
 mes1end                         = $125E ; addr, local, , test, data, test.asm:11
@@ -585,11 +585,10 @@ write_file("test.asm", <<'END');
 				jp sd_write_block_2gb + ASMDISP_SD_WRITE_BLOCK_2GB_CALLEE ;; error: symbol 'sd_write_block_2gb' not defined
 END
 my($stdout, $stderr, $return, @dummy) = capture { system "z80asm test.asm"; };
-is $stdout, "";
-is $stderr, <<'END';
+is_text( $stdout, "" );
+is_text( $stderr, <<'END' );
 Error at file 'test.asm' line 5: symbol 'sd_write_block_2gb' not defined
 Error at file 'test.asm' line 1: symbol 'sd_write_block_2gb' not defined
-2 errors occurred during assembly
 END
 is !!$return, !!1;
 
@@ -714,8 +713,8 @@ write_file("test2.asm", <<'...');
 my $cmd = "./z80asm -b test.asm test1.asm test2.asm";
 ok 1, $cmd;
 ($stdout, $stderr, $return, @dummy) = capture { system $cmd; };
-eq_or_diff_text $stdout, "", "stdout";
-eq_or_diff_text $stderr, "", "stderr";
+is_text( $stdout, "", "stdout" );
+is_text( $stderr, "", "stderr" );
 ok !!$return == !!0, "retval";
 ok ! -f "test.bin", "test.bin";
 is read_binfile("test_bank0.bin"), "\xC9\0\0\0\0\0\0\0\xC9\xC9", "test_bank0.bin";
@@ -868,8 +867,8 @@ my $bincode = sub {
 $cmd = "./z80asm -s -otest.o test1.asm test2.asm test3.asm test4.asm";
 ok 1, $cmd;
 ($stdout, $stderr, $return, @dummy) = capture { system $cmd; };
-eq_or_diff_text $stdout, "", "stdout";
-eq_or_diff_text $stderr, "", "stderr";
+is_text( $stdout, "", "stdout" );
+is_text( $stderr, "", "stderr" );
 ok !!$return == !!0, "retval";
 
 z80nm("test.o", <<'END');
@@ -913,7 +912,7 @@ Object  file test.o at $0000: Z80RMF12
     E Cw $0020 $0021: printa (section code) (file test3.asm:6)
 END
 
-eq_or_diff_text scalar(read_file("test.sym")), <<'END';
+is_text( scalar(read_file("test.sym")), <<'END' );
 test1_mess                      = $0000 ; addr, local, , , data, test1.asm:12
 test2_printa1                   = $0000 ; comput, local, , , , test2.asm:4
 test2__delay                    = $0018 ; addr, local, , , code, test2.asm:16
@@ -935,12 +934,12 @@ unlink "test.asm", "test.bin";
 $cmd = "./z80asm -b -m test.o test_lib.asm";
 ok 1, $cmd;
 ($stdout, $stderr, $return, @dummy) = capture { system $cmd; };
-eq_or_diff_text $stdout, "", "stdout";
-eq_or_diff_text $stderr, "", "stderr";
+is_text( $stdout, "", "stdout" );
+is_text( $stderr, "", "stderr" );
 ok !!$return == !!0, "retval";
 test_binfile("test.bin", $bincode->(0));
 
-eq_or_diff_text scalar(read_file("test.map")), <<'END';
+is_text( scalar(read_file("test.map")), <<'END' );
 test1_mess                      = $0025 ; addr, local, , test, data, test1.asm:12
 test2_printa1                   = $000D ; addr, local, , test, , test2.asm:4
 test2__delay                    = $0018 ; addr, local, , test, code, test2.asm:16
@@ -973,12 +972,12 @@ unlink "test.asm", "test.bin";
 $cmd = "./z80asm -b -m -r0x1234 test.o test_lib.asm";
 ok 1, $cmd;
 ($stdout, $stderr, $return, @dummy) = capture { system $cmd; };
-eq_or_diff_text $stdout, "", "stdout";
-eq_or_diff_text $stderr, "", "stderr";
+is_text( $stdout, "", "stdout" );
+is_text( $stderr, "", "stderr" );
 ok !!$return == !!0, "retval";
 test_binfile("test.bin", $bincode->(0x1234));
 
-eq_or_diff_text scalar(read_file("test.map")), <<'END';
+is_text( scalar(read_file("test.map")), <<'END' );
 test1_mess                      = $1259 ; addr, local, , test, data, test1.asm:12
 test2_printa1                   = $1241 ; addr, local, , test, , test2.asm:4
 test2__delay                    = $124C ; addr, local, , test, code, test2.asm:16
@@ -1023,8 +1022,8 @@ write_file("test_plat1.asm", <<'...');
 $cmd = "./z80asm -xtest_plat1.lib test_plat1 test_gen";
 ok 1, $cmd;
 ($stdout, $stderr, $return, @dummy) = capture { system $cmd; };
-eq_or_diff_text $stdout, "", "stdout";
-eq_or_diff_text $stderr, "", "stderr";
+is_text( $stdout, "", "stdout" );
+is_text( $stderr, "", "stderr" );
 ok !!$return == !!0, "retval";
 
 
@@ -1040,8 +1039,8 @@ write_file("test_plat2.asm", <<'...');
 $cmd = "./z80asm -xtest_plat2.lib test_plat2 test_gen";
 ok 1, $cmd;
 ($stdout, $stderr, $return, @dummy) = capture { system $cmd; };
-eq_or_diff_text $stdout, "", "stdout";
-eq_or_diff_text $stderr, "", "stderr";
+is_text( $stdout, "", "stdout" );
+is_text( $stderr, "", "stderr" );
 ok !!$return == !!0, "retval";
 
 
@@ -1056,8 +1055,8 @@ write_file("test.asm", <<'...');
 $cmd = "./z80asm -itest_plat1.lib -b test";
 ok 1, $cmd;
 ($stdout, $stderr, $return, @dummy) = capture { system $cmd; };
-eq_or_diff_text $stdout, "", "stdout";
-eq_or_diff_text $stderr, "", "stderr";
+is_text( $stdout, "", "stdout" );
+is_text( $stderr, "", "stderr" );
 ok !!$return == !!0, "retval";
 test_binfile("test.bin", pack("C*", 0xC3, 3, 0, 0x3E, 1, 0xC9));
 
@@ -1066,8 +1065,8 @@ test_binfile("test.bin", pack("C*", 0xC3, 3, 0, 0x3E, 1, 0xC9));
 $cmd = "./z80asm -itest_plat2.lib -b test";
 ok 1, $cmd;
 ($stdout, $stderr, $return, @dummy) = capture { system $cmd; };
-eq_or_diff_text $stdout, "", "stdout";
-eq_or_diff_text $stderr, "", "stderr";
+is_text( $stdout, "", "stdout" );
+is_text( $stderr, "", "stderr" );
 ok !!$return == !!0, "retval";
 test_binfile("test.bin", pack("C*", 0xC3, 3, 0, 0x3E, 2, 0xC9));
 
@@ -1119,37 +1118,37 @@ write_file("test1.asm", <<'...');
 $cmd = "./z80asm test1.asm";
 ok 1, $cmd;
 ($stdout, $stderr, $return, @dummy) = capture { system $cmd; };
-eq_or_diff_text $stdout, "", "stdout";
-eq_or_diff_text $stderr, "", "stderr";
+is_text( $stdout, "", "stdout" );
+is_text( $stderr, "", "stderr" );
 ok !!$return == !!0, "retval";
 
 $cmd = "../../src/z80nm/z80nm test1.o";
 ok 1, $cmd;
 ($stdout, $stderr, $return, @dummy) = capture { system $cmd; };
 $stdout = join("\n", grep {/__/} split(/\n/, $stdout))."\n";
-eq_or_diff_text $stdout, <<'END', "stdout";
+is_text( $stdout, <<'END', "stdout" );
     U         __LOADER_head
     U         __LOADER_tail
 END
-eq_or_diff_text $stderr, "", "stderr";
+is_text( $stderr, "", "stderr" );
 ok !!$return == !!0, "retval";
 
 
 $cmd = "./z80asm --output=test1.o test1.asm";
 ok 1, $cmd;
 ($stdout, $stderr, $return, @dummy) = capture { system $cmd; };
-eq_or_diff_text $stdout, "", "stdout";
-eq_or_diff_text $stderr, "", "stderr";
+is_text( $stdout, "", "stdout" );
+is_text( $stderr, "", "stderr" );
 ok !!$return == !!0, "retval";
 
 $cmd = "../../src/z80nm/z80nm test1.o";
 ok 1, $cmd;
 ($stdout, $stderr, $return, @dummy) = capture { system $cmd; };
 $stdout = join("\n", grep {/__/} split(/\n/, $stdout))."\n";
-eq_or_diff_text $stdout, <<'END', "stdout";
+is_text( $stdout, <<'END', "stdout" );
     U         __LOADER_head
     U         __LOADER_tail
 END
-eq_or_diff_text $stderr, "", "stderr";
+is_text( $stderr, "", "stderr" );
 ok !!$return == !!0, "retval";
 

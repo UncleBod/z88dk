@@ -54,6 +54,8 @@ ENDIF
 	defc	__CPU_CLOCK = 3579545
         INCLUDE "crt/classic/crt_rules.inc"
 
+	INCLUDE	"target/mc1000/def/maths_mbf.def"
+
 	org     CRT_ORG_CODE
 
 
@@ -341,9 +343,6 @@ irq_hndl:
 		ex	(sp),hl
 		ret
 
-
-        defm  "Small C+ MC1000"
-        defb   0
 
 		
 ; If we were given an address for the BSS then use it

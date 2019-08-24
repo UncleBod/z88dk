@@ -15,7 +15,6 @@ static char             *binname      = NULL;
 static char             *crtfile      = NULL;
 static char             *outfile      = NULL;
 static char             *blockname    = NULL;
-static int               origin       = -1;
 static char              help         = 0;
 
 
@@ -28,17 +27,14 @@ option_t mz2500_options[] = {
     {  0,  NULL,       NULL,                         OPT_NONE,  NULL }
 };
 
-static cpm_discspec spec = {
+static disc_spec spec = {
+    .name = "MZ2500",
     .sectors_per_track = 16,
     .tracks = 40,
     .sides = 2,
     .sector_size = 256,
     .gap3_length = 0x17,
     .filler_byte = 0xe5,
-    .boottracks = 2,
-    .directory_entries = 128,
-    .extent_size = 2048,
-    .byte_size_extents = 0,
     .first_sector_offset = 1,
     .alternate_sides = 1
 };
@@ -46,14 +42,14 @@ static cpm_discspec spec = {
 static uint8_t    sectorbuf[256];
 
 
-void write_sector(cpm_handle *h, int track, int sector, int head) 
+void write_sector(disc_handle *h, int track, int sector, int head) 
 {
     int  i;
 
     for ( i = 0; i < sizeof(sectorbuf);i++ ) {
         sectorbuf[i] ^= 0xff;
     }
-    cpm_write_sector(h, track, sector, head, sectorbuf);
+    disc_write_sector(h, track, sector, head, sectorbuf);
 
 }
 
@@ -65,12 +61,11 @@ void write_sector(cpm_handle *h, int track, int sector, int head)
 int mz2500_exec(char* target)
 {
     char filename[FILENAME_MAX + 1];
-    char name[14];
     FILE* fpin;
-    int len, namelen;
-    int i, j, c;
+    int len;
+    int i;
     int track, sector, head, written;
-    cpm_handle *h;
+    disc_handle *h;
 
     if (help)
         return -1;
@@ -88,7 +83,6 @@ int mz2500_exec(char* target)
 
     suffix_change(filename, ".dsk");
 
-    namelen = strlen(filename) - 1;
 
     if (strcmp(binname, filename) == 0) {
         fprintf(stderr, "Input and output file names must be different\n");
@@ -114,7 +108,7 @@ int mz2500_exec(char* target)
     len = ftell(fpin);
     fseek(fpin, 0L, SEEK_SET);
 
-    h = cpm_create(&spec);
+    h = disc_create(&spec);
 
     /* Disk block #2 (directory) */
     memset(sectorbuf, 0, sizeof(sectorbuf));
@@ -166,8 +160,8 @@ int mz2500_exec(char* target)
     }
 
     fclose(fpin);
-    cpm_write_edsk(h, filename);
-    cpm_free(h);
+    disc_write_edsk(h, filename);
+    disc_free(h);
 
     return 0;
 }

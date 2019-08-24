@@ -6,10 +6,12 @@
 ;	$Id: w_bkrestore.asm $
 ;
 
-	SECTION	 code_clib
+	SECTION   smc_clib
+	
 	PUBLIC    bkrestore
 	PUBLIC    _bkrestore
-	EXTERN	w_pixeladdress
+	
+	EXTERN    w_pixeladdress
 
 
 .bkrestore

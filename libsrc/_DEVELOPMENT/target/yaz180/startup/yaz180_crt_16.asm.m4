@@ -56,7 +56,7 @@ dnl#include(`../m4_file_dup.m4')dnl
 dnl
 dnl## empty fd slot
 dnl
-dnl#include(`../../m4_file_absent.m4')dnl
+dnl#include(`../m4_file_absent.m4')dnl
 dnl
 dnl############################################################
 dnl## INSTANTIATE DRIVERS #####################################
@@ -113,16 +113,6 @@ IF __crt_include_preamble
 ENDIF
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; PAGE ZERO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-IF (__crt_org_code = 0) && !(__page_zero_present)
-
-   include "../crt_page_zero_z180.inc"
-
-ENDIF
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CRT INIT ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -136,13 +126,13 @@ __Start:
 __Restart:
 
    include "../crt_init_sp.inc"
-   
+
    ; command line
-   
+
    IF (__crt_enable_commandline = 1) || (__crt_enable_commandline >= 3)
-   
+
       include "../crt_cmdline_empty.inc"
-   
+
    ENDIF
 
 __Restart_2:
@@ -183,20 +173,20 @@ SECTION code_crt_main
    ; run exit stack
 
    IF __clib_exit_stack_size > 0
-   
+
       EXTERN asm_exit
       jp asm_exit              ; exit function jumps to __Exit
-   
+
    ENDIF
 
 __Exit:
 
    IF !((__crt_on_exit & 0x10000) && (__crt_on_exit & 0x8))
-   
+
       ; not restarting
       
       push hl                  ; save return status
-   
+
    ENDIF
 
 SECTION code_crt_exit          ; user and library cleanup
@@ -207,17 +197,14 @@ SECTION code_crt_return
    include "../clib_close.inc"
 
    ; terminate
-   
+
    include "../crt_exit_eidi.inc"
    include "../crt_restore_sp.inc"
-   include "../crt_program_exit.inc"      
+   include "../crt_program_exit.inc"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; RUNTIME VARS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-include "../crt_jump_vectors_z180.inc"
-include "crt_interrupt_vectors_z180.inc"
 
 IF (__crt_on_exit & 0x10000) && ((__crt_on_exit & 0x6) || ((__crt_on_exit & 0x8) && (__register_sp = -1)))
 

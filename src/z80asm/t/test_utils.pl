@@ -3,13 +3,14 @@
 #-----------------------------------------------------------------------------
 # Z88DK Z80 Macro Assembler
 #
-# Copyright (C) Paulo Custodio, 2011-2018
+# Copyright (C) Paulo Custodio, 2011-2019
 # License: http://www.perlfoundation.org/artistic_license_2_0
 #
 # Common utils for tests
 #-----------------------------------------------------------------------------
 
 use Modern::Perl;
+use Config;
 use Path::Tiny;
 use File::Slurp;
 use Capture::Tiny::Extended 'capture';
@@ -22,10 +23,10 @@ my $STOP_ON_ERR = grep {/-stop/} @ARGV;
 my $KEEP_FILES	= grep {/-keep/} @ARGV; 
 my $test	 = "test";
 
-sub z80asm	 { $ENV{Z80ASM} || "./z80asm" }
+sub z80asm	 { $ENV{Z80ASM_EXE} || "./z80asm" }
 
 my @TEST_EXT = (qw( asm lis inc bin map o lib sym def err 
-					exe c lst prj i reloc tap P ));
+					exe c cpp lst prj i reloc tap P ));
 my @MAIN_TEST_FILES;
 my @TEST_FILES;
 my @IDS = ("", 0 .. 20);
@@ -59,7 +60,8 @@ sub unlink_testfiles {
 		diag "$line -keep : kept test files";
 	}
 	else {
-		_unlink_files($line, @TEST_FILES, @additional_files, <test*.bin>, <test*.reloc>);
+		_unlink_files($line, @TEST_FILES, @additional_files, 
+					  'test'.$Config{_exe}, <test*.bin>, <test*.reloc>);
 	}
 }
 
@@ -122,24 +124,21 @@ sub t_z80asm {
 	my $errors;
 
 	# check stdout
-	$args{out} ||= ""; chomp($args{out}); chomp($stdout);
-	$errors++ unless $stdout eq $args{out};
-	is $stdout, $args{out}, "$line out";
+	$args{out} ||= ""; chomp_eol($args{out}); chomp_eol($stdout);
+	my $ok_out = is_text($stdout, $args{out}, "$line out");
+	$errors++ unless $ok_out;
 	
 	# check stderr
 	$args{err} ||= ""; $args{linkerr} ||= ""; 
-	chomp($args{err}); chomp($args{linkerr}); chomp($stderr);
+	chomp_eol($args{err}); chomp_eol($args{linkerr}); chomp_eol($stderr);
 	my $exp_err_screen = my $exp_err_file = $args{err}.$args{linkerr};
-	if (! defined($args{bin})) {
-		$exp_err_screen .= "\n1 errors occurred during assembly";
-	}
-	$errors++ unless $stderr eq $exp_err_screen;
-	is $stderr, $exp_err_screen, "$line err";
+	my $ok_err_screen = is_text($stderr, $exp_err_screen, "$line err");
+	$errors++ unless $ok_err_screen;
 	if ($stderr && $stderr !~ /option.*deprecated/) {	# option deprecated: before error file is created
 		ok -f err_file(), "$line ".err_file();
 		my $got_err_file = read_file(err_file(), err_mode => 'quiet') // "";
-		chomp($got_err_file);
-		is $exp_err_file, $got_err_file, "$line err file";
+		chomp_eol($got_err_file);
+		is_text($exp_err_file, $got_err_file, "$line err file");
 	}
 	
 	# check retval
@@ -246,8 +245,7 @@ sub t_z80asm_error {
 		system $cmd;
 	};
 	is $stdout, "", "$line stdout";
-	is $stderr, $expected_err."\n".
-				"1 errors occurred during assembly\n", "$line stderr";
+	is_text( $stderr, $expected_err, "$line stderr" );
 	ok $return != 0, "$line exit value";
 	ok -f err_file(), "$line error file found";
 	ok ! -f o_file(), "$line object file deleted";
@@ -259,8 +257,8 @@ sub t_z80asm_error {
 		ok ! -f $1, "$line library file deleted";
 	}
 	
-	is read_file(err_file(), err_mode => 'quiet'), 
-				$expected_err."\n", "$line error in error file";
+	is_text( read_file(err_file(), err_mode => 'quiet'), 
+				$expected_err, "$line error in error file" );
 
 	exit 1 if $return == 0 && $STOP_ON_ERR;
 }
@@ -270,7 +268,7 @@ sub t_z80asm_ok {
 	my($address_hex, $code, $expected_binary, $options, $expected_warnings) = @_;
 
 	$expected_warnings ||= "";
-	chomp($expected_warnings);
+	chomp_eol($expected_warnings);
 	
 	my $line = "[line ".((caller)[2])."]";
 	(my $test_name = $code) =~ s/\n.*/.../s;
@@ -288,8 +286,8 @@ sub t_z80asm_ok {
 	};
 	
 	is $stdout, "", "$line stdout";
-	chomp($stderr);
-	is $stderr, $expected_warnings, "$line stderr";
+	chomp_eol($stderr);
+	is_text( $stderr, $expected_warnings, "$line stderr" );
 	
 	ok $return == 0, "$line exit value";
 	ok ! -f err_file(), "$line no error file";
@@ -343,8 +341,8 @@ sub t_z80asm_capture {
 		system z80asm()." ".$args;
 	};
 
-	eq_or_diff_text $stdout, $expected_out, "$line stdout";
-	eq_or_diff_text $stderr, $expected_err, "$line stderr";
+	is_text( $stdout, $expected_out, "$line stdout" );
+	is_text( $stderr, $expected_err, "$line stderr" );
 	ok !!$return == !!$expected_retval, "$line retval";
 	
 	exit 1 if $STOP_ON_ERR && 
@@ -487,14 +485,14 @@ sub t_compile_module {
 	my($init_code, $main_code, $compile_args) = @_;
 
 	# modules to include always
-	$compile_args .= " -DMEMALLOC_DEBUG lib/alloc.c";
+	$compile_args .= " lib/alloc.o ";
 	
 	# wait for previous run to finish
-	while (-f 'test.exe' && ! unlink('test.exe')) {
+	while (-f 'test'.$Config{_exe} && ! unlink('test'.$Config{_exe})) {
 		sleep(1);
 	}
 	
-	my($CFLAGS, $LDFLAGS) = get_gcc_options();
+	my($CFLAGS, $CXXFLAGS, $LDFLAGS) = get_gcc_options();
 	
 	# get list of object files
 	my %modules;
@@ -576,7 +574,7 @@ int main (int argc, char **argv)
 	write_file("test.c", $main_code);
 
 	# build
-	my $cc = "gcc $CFLAGS -O0 -o test.exe test.c $compile_args $LDFLAGS";
+	my $cc = "gcc $CFLAGS -O0 -o test$Config{_exe} test.c $compile_args $LDFLAGS";
 	note "line ", (caller)[2], ": $cc";
 	
 	my $ok = (0 == system($cc));
@@ -589,14 +587,14 @@ int main (int argc, char **argv)
 sub t_run_module {
 	my($args, $expected_out, $expected_err, $expected_exit) = @_;
 	
-	note "line ", (caller)[2], ": test.exe @$args";
-	my($out, $err, $exit) = capture { system("./test.exe", @$args) };
+	note "line ", (caller)[2], ": test$Config{_exe} @$args";
+	my($out, $err, $exit) = capture { system("./test$Config{_exe}", @$args) };
 	note "line ", (caller)[2], ": exit ", $exit >> 8;
 	
 	$err = normalize($err);
 	
-	eq_or_diff_text $out, $expected_out;
-	eq_or_diff_text $err, $expected_err;
+	is_text( $out, $expected_out );
+	is_text( $err, $expected_err );
 	is !!$exit, !!$expected_exit;
 	
 	# if DEBUG, call winmergeu to compare out and err with expected out and err
@@ -682,10 +680,6 @@ sub get_copyright {
 sub get_gcc_options {
 	our %FLAGS;
 	
-	# hack
-#	$ENV{LOCAL_LIB} = "lib";
-#	$ENV{OPT} ||= "";
-	
 	if ( ! %FLAGS ) {
 		my %vars;
 		open(my $pipe, "make -p|") or die;
@@ -697,25 +691,45 @@ sub get_gcc_options {
 		}
 		close($pipe) or die;
 		
-		$FLAGS{CFLAGS}   ||= '';
-		$FLAGS{CPPFLAGS} ||= '';
-		$FLAGS{LDFLAGS}  ||= '';
-
 		while (my($flag, $text) = each %vars) {
-			if ($flag =~ /^\w*(CFLAGS|CPPFLAGS|LDFLAGS)$/) {
-				$flag = $1;
+			if ($flag =~ /(CFLAGS|CXXFLAGS|LDFLAGS)$/) {
+				my $redo;
+				do {
+					$redo = 0;
+					$redo += ($text =~ s/\$\((\w+)\)/ $vars{$1} || "" /ge);
+					$redo += ($text =~ s/\$\(shell (.*?)\)/ `$1` /ge);
+				} while ($redo);
 				
-				$text =~ s/\$\((\w+)\)/ $vars{$1} || "" /ge;
-				
-				$text =~ s/\$\(shell (.*?)\)/ `$1` /ge;
 				$text =~ s/\s+/ /g;
 			
-				$FLAGS{$flag} = join(" ", $FLAGS{$flag}, $text);
+				$FLAGS{$flag} = join(" ", ($FLAGS{$flag}//''), $text);
 			}
 		}
 	}
 	
-	return @FLAGS{qw( CFLAGS LDFLAGS )};
+	return map {$_ // ''} @FLAGS{qw( LOCAL_CFLAGS LOCAL_CXXFLAGS LDFLAGS )};
 };
+
+#------------------------------------------------------------------------------
+# EOL-agnostic text compare
+#------------------------------------------------------------------------------
+sub is_text {
+	my($got, $expected, $name) = @_;
+	
+	# normalize white space
+	for ($got, $expected) {
+		s/[ \t]+/ /g;
+		s/\r\n/\n/g;
+		s/\s+\z//;
+	}
+	eq_or_diff_text($got, $expected, $name);
+	return $got eq $expected;
+}
+
+sub chomp_eol {
+	local $_ = shift;
+	s/[\r\n]+\z//;
+	return $_;
+}
 
 1;

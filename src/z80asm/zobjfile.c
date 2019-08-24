@@ -2,9 +2,9 @@
 Z88DK Z80 Macro Assembler
 
 Copyright (C) Gunther Strube, InterLogic 1993-99
-Copyright (C) Paulo Custodio, 2011-2017
+Copyright (C) Paulo Custodio, 2011-2019
 License: The Artistic License 2.0, http://www.perlfoundation.org/artistic_license_2_0
-Repository: https://github.com/pauloscustodio/z88dk-z80asm
+Repository: https://github.com/z88dk/z88dk
 
 Handle object file contruction, reading and writing
 */
@@ -222,6 +222,10 @@ void write_obj_file(const char *source_filename )
 
 	/* open file */
 	obj_filename = get_obj_filename( source_filename );
+
+	if (opts.verbose)
+		printf("Writing object file '%s'\n", path_canon(obj_filename));
+
 	fp = xfopen( obj_filename, "wb" );
 
 	/* write header */

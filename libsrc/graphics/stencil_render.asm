@@ -13,7 +13,7 @@
 
 	INCLUDE	"graphics/grafix.inc"
 
-        SECTION code_clib
+        SECTION smc_clib
 	PUBLIC	stencil_render
 	PUBLIC	_stencil_render
 	EXTERN	dither_pattern

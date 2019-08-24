@@ -38,13 +38,13 @@ for %%t in (%targets%) do (
 
       set cpu=
       if "%%t" == "yaz180" (
-         set cpu="--cpu=z180"
+         set cpu="-mz180"
       ) else (
          if "%%t" == "z180" (
-            set cpu="--cpu=z180"
+            set cpu="-mz180"
          ) else (
             if "%%t" == "zxn" (
-               set cpu="--cpu=z80-zxn"
+               set cpu="-mz80n"
             )
          )
       )
@@ -61,15 +61,15 @@ for %%t in (%targets%) do (
       if "%%t" == "zx" (
          zcc +z80 -vn -clib=new --no-crt -g -Ca"-DSTRIPVECTOR" arch/zx/bifrost2/z80/BIFROST2_ENGINE.asm.m4 -o arch/zx/bifrost2/z80/bifrost2_engine_48.bin
          zcc +z80 -vn -clib=new --no-crt -g -Ca"-DPLUS3 -DSTRIPVECTOR" arch/zx/bifrost2/z80/BIFROST2_ENGINE.asm.m4 -o arch/zx/bifrost2/z80/bifrost2_engine_p3.bin
-         zx7 -f arch/zx/bifrost2/z80/bifrost2_engine_48.bin
-         zx7 -f arch/zx/bifrost2/z80/bifrost2_engine_p3.bin
+         z88dk-zx7 -f arch/zx/bifrost2/z80/bifrost2_engine_48.bin
+         z88dk-zx7 -f arch/zx/bifrost2/z80/bifrost2_engine_p3.bin
       )
 
       if "%%t" == "zxn" (
          zcc +z80 -vn -clib=new --no-crt -g -Ca"-DSTRIPVECTOR" arch/zx/bifrost2/z80/BIFROST2_ENGINE.asm.m4 -o arch/zx/bifrost2/z80/bifrost2_engine_48.bin
          zcc +z80 -vn -clib=new --no-crt -g -Ca"-DPLUS3 -DSTRIPVECTOR" arch/zx/bifrost2/z80/BIFROST2_ENGINE.asm.m4 -o arch/zx/bifrost2/z80/bifrost2_engine_p3.bin
-         zx7 -f arch/zx/bifrost2/z80/bifrost2_engine_48.bin
-         zx7 -f arch/zx/bifrost2/z80/bifrost2_engine_p3.bin
+         z88dk-zx7 -f arch/zx/bifrost2/z80/bifrost2_engine_48.bin
+         z88dk-zx7 -f arch/zx/bifrost2/z80/bifrost2_engine_p3.bin
       )
 
       if exist target\%%t\library\%%t_macro.lst (

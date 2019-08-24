@@ -3,9 +3,9 @@
 # Z88DK Z80 Macro Assembler
 #
 # Copyright (C) Gunther Strube, InterLogic 1993-99
-# Copyright (C) Paulo Custodio, 2011-2017
+# Copyright (C) Paulo Custodio, 2011-2019
 # License: The Artistic License 2.0, http://www.perlfoundation.org/artistic_license_2_0
-# Repository: https://github.com/pauloscustodio/z88dk-z80asm
+# Repository: https://github.com/z88dk/z88dk
 #
 # Test error messages
 
@@ -28,8 +28,7 @@ require './t/test_utils.pl';
 # CH_0012 : wrappers on OS calls to raise fatal error
 unlink_testfiles();
 t_z80asm_capture(asm_file(), "",
-		"Error: cannot read file '".asm_file()."'\n".
-		"1 errors occurred during assembly\n",
+		"Error: cannot read file '".asm_file()."'\n",
 		1);
 
 unlink_testfiles();
@@ -42,8 +41,7 @@ t_z80asm_error('
 unlink_testfiles();
 write_file(asm_file(), "nop");
 t_z80asm_capture("-b -ixxxx ".asm_file(), "",
-		"Error: cannot read file 'xxxx.lib'\n".
-		"1 errors occurred during assembly\n",
+		"Error: cannot read file 'xxxx.lib'\n",
 		1);
 
 #------------------------------------------------------------------------------
@@ -54,8 +52,7 @@ write_binfile(o_file(), objfile( NAME => "test",
 								   EXPR => [ ["C", "test.asm",1, "", 0, 0, "", "*+VAL"] ] ));
 t_z80asm_capture("-b -d ".o_file(),
 				 "",
-				 "Error at file 'test.asm' line 1: syntax error in expression\n".
-				 "1 errors occurred during assembly\n",
+				 "Error at file 'test.asm' line 1: syntax error in expression\n",
 				 1);
 
 #------------------------------------------------------------------------------
@@ -296,23 +293,24 @@ t_z80asm_capture("-x".$lib." ".asm_file(), "", "", 0);
 ok -f $lib;
 write_file(asm_file(), "EXTERN main \n call main");
 t_z80asm_capture("-b -i".$lib." ".asm_file(), "",
-		"Error at file 'test.asm' line 2: symbol 'main' not defined\n".
-		"1 errors occurred during assembly\n",
+		"Error at file 'test.asm' line 2: symbol 'main' not defined\n",
 		1);
 
 #------------------------------------------------------------------------------
 # error_no_src_file
 unlink_testfiles();
 t_z80asm_capture("-b", "",
-		"Error: source filename missing\n".
-		"1 errors occurred during assembly\n", 1);
+		"Error: source file missing\n", 1);
 
 #------------------------------------------------------------------------------
 # error_illegal_option
 unlink_testfiles();
 write_file(asm_file(), "");
 t_z80asm_capture("-Zillegaloption ".asm_file(), "",
-		"Error: illegal option '-Zillegaloption'\n1 errors occurred during assembly\n",
+		"Error: illegal option: -Zillegaloption\n",
+		1);
+t_z80asm_capture("+Zillegaloption ".asm_file(), "",
+		"Error: illegal option: +Zillegaloption\n",
 		1);
 
 #------------------------------------------------------------------------------
@@ -359,8 +357,7 @@ t_binary(read_binfile(bin_file()),
 write_file(asm_file(), "defs 65536, 0xAA");
 t_z80asm_capture(asm_file()." ".asm1_file(), "", "", 0);
 t_z80asm_capture("-d -b ".asm_file()." ".asm1_file(), "",
-	"Error: max. code size of 65536 bytes reached\n".
-	"1 errors occurred during assembly\n", 1);
+	"Error: max. code size of 65536 bytes reached\n", 1);
 
 # parseline
 t_z80asm_ok(0, "defs 65535, 0xAA \n defb 0xAA \n",
@@ -380,8 +377,7 @@ t_z80asm_error("defs 65536, 0xAA \n defb 0xAA \n",
 unlink_testfiles();
 write_file(asm_file(), "nop");
 t_z80asm_capture(asm_file()." -IllegalFilename", "",
-		"Error: illegal source filename '-IllegalFilename'\n".
-		"1 errors occurred during assembly\n", 1);
+		"Error: cannot read file '-IllegalFilename'\n", 1);
 
 #------------------------------------------------------------------------------
 # error_org_redefined - tested in directives.t
@@ -409,7 +405,6 @@ substr($obj,6,2)="99";		# change version
 write_file(o_file(), $obj);
 t_z80asm_capture("-b  ".o_file(), "", <<"END", 1);
 Error: object file 'test.o' version 99, expected version 12
-1 errors occurred during assembly
 END
 
 #------------------------------------------------------------------------------
@@ -439,8 +434,7 @@ write_binfile(o_file(), objfile( NAME => "test",
 t_z80asm_capture("-b -d ".o_file(),
 				 "",
 				 "Error at module 'test': file 'test.o' not an object file\n".
-				 "Error at module 'test': file 'test.o' not an object file\n".
-				 "2 errors occurred during assembly\n",
+				 "Error at module 'test': file 'test.o' not an object file\n",
 				 1);
 
 #------------------------------------------------------------------------------
@@ -449,8 +443,7 @@ unlink_testfiles();
 write_file(asm_file(), "nop");
 write_file(lib_file(), "not a library");
 t_z80asm_capture("-b -i".lib_file()." ".asm_file(), "",
-		"Error: file 'test.lib' not a library file\n".
-		"1 errors occurred during assembly\n",
+		"Error: file 'test.lib' not a library file\n",
 		1);
 
 #------------------------------------------------------------------------------
@@ -462,7 +455,6 @@ write_file(asm_file(), "nop");
 write_file(lib_file(), $lib);
 t_z80asm_capture("-b -i".lib_file()." ".asm_file(), "", <<"END", 1);
 Error: library file 'test.lib' version 99, expected version 12
-1 errors occurred during assembly
 END
 
 #------------------------------------------------------------------------------
@@ -487,7 +479,7 @@ t_binary(read_binfile("test.bin"), "\xFE\x10");
 unlink_testfiles();
 
 my $objs = "errors.o error_func.o scan.o lib/array.o lib/class.o lib/str.o lib/strhash.o lib/list.o  ../common/fileutil.o ../common/strutil.o ../common/die.o ../common/objfile.o ../../ext/regex/regcomp.o ../../ext/regex/regerror.o ../../ext/regex/regexec.o ../../ext/regex/regfree.o options.o model.o module.o sym.o symtab.o codearea.o expr.o listfile.o lib/srcfile.o macros.o hist.o lib/dbg.o ";
-if ($^O eq 'MSWin32') {
+if ($^O eq 'MSWin32' || $^O eq 'msys') {
 	  $objs .= "../../ext/UNIXem/src/glob.o ../../ext/UNIXem/src/dirent.o ";
 }
 
@@ -506,7 +498,6 @@ t_compile_module($init, <<'END', $objs);
 	check_count(0);
 
 	warn("Information\n");
-	info_total_errors();
 	check_count(0);
 
 	warn("Warning\n");
@@ -524,7 +515,6 @@ END
 
 t_run_module([], '', <<'ERR', 0);
 Information
-0 errors occurred during assembly
 Warning
 Warning: symbol 'main' used as 'MAIN'
 Error
@@ -610,12 +600,12 @@ ERR
 
 ok ! -f "test1.err", "no errors, file deleted";
 
-eq_or_diff_text scalar(read_file('test2.err')), <<'END';
+is_text( scalar(read_file('test2.err')), <<'END' );
 Error: syntax error
 Error: syntax error
 END
 
-eq_or_diff_text scalar(read_file('test3.err')), <<'END';
+is_text( scalar(read_file('test3.err')), <<'END' );
 Error: syntax error
 END
 
@@ -648,7 +638,6 @@ Error at file 'test.asm' line 10: symbol 'undefined' not defined
 Error at file 'test.asm' line 10: expected constant expression
 Error at file 'test.asm' line 11: symbol 'undefined' not defined
 Error at file 'test.asm' line 11: expected constant expression
-12 errors occurred during assembly
 ERR
 
 unlink_testfiles();

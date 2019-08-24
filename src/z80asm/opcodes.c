@@ -2,9 +2,9 @@
 Z88DK Z80 Macro Assembler
 
 Copyright (C) Gunther Strube, InterLogic 1993-99
-Copyright (C) Paulo Custodio, 2011-2017
+Copyright (C) Paulo Custodio, 2011-2019
 License: The Artistic License 2.0, http://www.perlfoundation.org/artistic_license_2_0
-Repository: https://github.com/pauloscustodio/z88dk-z80asm
+Repository: https://github.com/z88dk/z88dk
 
 Define CPU opcodes
 */
@@ -16,6 +16,8 @@ Define CPU opcodes
 #include "opcodes.h"
 #include "parse.h"
 #include "z80asm.h"
+
+#include <assert.h>
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
@@ -48,8 +50,31 @@ void add_opcode(int opcode)
 /* add opcode followed by jump relative offset expression */
 void add_opcode_jr(int opcode, Expr *expr)
 {
-	add_opcode(opcode);
-	Pass2infoExpr(RANGE_JR_OFFSET, expr);
+	if (opts.opt_speed) {
+		switch (opcode) {
+		case Z80_JR:
+			add_opcode(Z80_JP);
+			Pass2infoExpr(RANGE_WORD, expr);
+			break;
+		case Z80_JR_FLAG(FLAG_NZ):
+		case Z80_JR_FLAG(FLAG_Z):
+		case Z80_JR_FLAG(FLAG_NC):
+		case Z80_JR_FLAG(FLAG_C):
+			add_opcode(opcode - Z80_JR_FLAG(0) + Z80_JP_FLAG(0));
+			Pass2infoExpr(RANGE_WORD, expr);
+			break;
+		case Z80_DJNZ:		// "dec b; jp nz" is always slower
+			add_opcode(opcode);
+			Pass2infoExpr(RANGE_JR_OFFSET, expr);
+			break;
+		default:
+			assert(0);
+		}
+	}
+	else {
+		add_opcode(opcode);
+		Pass2infoExpr(RANGE_JR_OFFSET, expr);
+	}
 }
 
 /* add opcode followed by 8-bit unsigned expression */
@@ -182,7 +207,7 @@ void add_Z88_INVOKE(int argument)
 // (0<=VER<=311, 0<=HOR<=55)  BIG ENDIAN!
 void add_copper_unit_wait(Expr *ver, Expr *hor)
 { 
-	if (opts.cpu != CPU_Z80_ZXN)
+	if (opts.cpu != CPU_Z80N)
 		error_illegal_ident();
 	else {
 		char expr_text[MAXLINE];
@@ -200,7 +225,7 @@ void add_copper_unit_wait(Expr *ver, Expr *hor)
 // (0<= REG <= 127, 0 <= VAL <= 255)  BIG ENDIAN!
 void add_copper_unit_move(Expr *reg, Expr *val)
 {
-	if (opts.cpu != CPU_Z80_ZXN)
+	if (opts.cpu != CPU_Z80N)
 		error_illegal_ident();
 	else {
 		char expr_text[MAXLINE];
@@ -218,7 +243,7 @@ void add_copper_unit_move(Expr *reg, Expr *val)
 // cu.stop   -> 16 - bit encoding 0xffff (impossible cu.wait)
 void add_copper_unit_stop()
 {
-	if (opts.cpu != CPU_Z80_ZXN)
+	if (opts.cpu != CPU_Z80N)
 		error_illegal_ident();
 	else
 		append_word_be(0xFFFF);
@@ -227,7 +252,7 @@ void add_copper_unit_stop()
 // cu.nop  -> 16 - bit encoding 0x0000 (do nothing cu.move)
 void add_copper_unit_nop()
 {
-	if (opts.cpu != CPU_Z80_ZXN)
+	if (opts.cpu != CPU_Z80N)
 		error_illegal_ident();
 	else
 		append_word_be(0x0000);

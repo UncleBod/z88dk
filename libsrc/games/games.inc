@@ -5,7 +5,7 @@
 ;       based on the Dominic's sound routines
 ;
 ;
-;       $Id: games.inc,v 1.31 2016-11-15 11:42:34 stefano Exp $
+;       $Id: games.inc $
 ;
 
 IF FORc128
@@ -36,6 +36,7 @@ IF FORsvi
         defc sndbit_port   = 150
         defc sndbit_bit    = 7
         defc sndbit_mask   = 158        ; bit 7 (key click) and 5 (tape)
+	defc JOYSTICK_inkey = 1
 ENDIF
 
 IF FORsam
@@ -60,6 +61,14 @@ IF FORaquarius
         defc sndbit_port   = 252
         defc sndbit_bit    = 0
         defc sndbit_mask   = 1
+	defc JOYSTICK_inkey = 1
+ENDIF
+
+IF FORalphatro
+        defc sndbit_port   = 0
+        defc sndbit_bit    = 0
+        defc sndbit_mask   = 0
+	defc JOYSTICK_inkey = 1
 ENDIF
 
 IF FORenterprise
@@ -68,10 +77,22 @@ IF FORenterprise
         defc sndbit_mask   = 32
 ENDIF
 
+IF FORg800
+        defc sndbit_port   = $18
+        defc sndbit_bit    = 7
+        defc sndbit_mask   = 192
+ENDIF
+
 IF FORp2000
         defc sndbit_port   = 80
         defc sndbit_bit    = 0
         defc sndbit_mask   = 1
+ENDIF
+
+IF FORpc88
+        defc sndbit_port   = $40
+        defc sndbit_bit    = 7		; bit 5 could be chosen for earlier models (worse quality)
+        defc sndbit_mask   = 128	; as above
 ENDIF
 
 IF FORti82
@@ -110,6 +131,7 @@ IF FORtrs80
         defc sndbit_port   = 255
         defc sndbit_bit    = 1
         defc sndbit_mask   = 3
+	defc JOYSTICK_inkey = 1
 ENDIF
 
 IF FORvg5k
@@ -173,8 +195,32 @@ IF FORaussie
         defc sndbit_mask   = 128	; bit 6 should stay 'on'
 ENDIF
 
+IF FORpasopia7
+    defc sndbit_port	= $30	
+    defc sndbit_bit    = 7
+    defc sndbit_mask   = $80	
+ENDIF
+
+IF FORsuper80
+	defc	sndbit_port = $F0
+	defc	sndbit_bit = 3
+	defc	sndbit_mask = 8
+	defc JOYSTICK_inkey = 1
+ENDIF
+
+IF FORz80tvgame
+	defc	sndbit_port = $02
+	defc	sndbit_bit = 0
+	defc	sndbit_mask = 1
+ENDIF
 
 ; Compatibily ones only, the following ports don't have a beeper
+IF FORsv8000
+        defc sndbit_port   = 0
+        defc sndbit_bit    = 0
+        defc sndbit_mask   = 0
+ENDIF
+
 IF FOReinstein
         defc sndbit_port   = 0
         defc sndbit_bit    = 0
@@ -211,6 +257,33 @@ IF FORosca
         defc sndbit_mask   = 0
 ENDIF
 
+IF FORsrr
+        defc sndbit_port   = 0
+        defc sndbit_bit    = 0
+        defc sndbit_mask   = 0
+	defc JOYSTICK_inkey = 1
+ENDIF
+
+IF FORspc1000
+        defc sndbit_port   = 0
+        defc sndbit_bit    = 0
+        defc sndbit_mask   = 0
+	defc JOYSTICK_inkey = 1
+ENDIF
+
+IF FORpc6001
+        defc sndbit_port   = 0
+        defc sndbit_bit    = 0
+        defc sndbit_mask   = 0
+ENDIF
+
+IF FORsmc777
+    defc sndbit_port	= $1d
+    defc sndbit_bit    = 4
+    defc sndbit_mask   = $15
+ENDIF
+
+
 ; ********************************************************
 ;  SN76489 PSG chip definitions
 ; ********************************************************
@@ -223,14 +296,16 @@ ENDIF
 
 IF FORsc3000
 	defc sndbit_port	= $7F		; also valid for SG-1000
-    defc sndbit_bit    = 3
-    defc sndbit_mask   = $0F			; $0F for full volume output
+        defc sndbit_bit    = 3
+        defc sndbit_mask   = $0F			; $0F for full volume output
+	defc JOYSTICK_inkey = 1
 ENDIF
 
 IF FORm5
 	defc sndbit_port	= $20
-    defc sndbit_bit    = 3
-    defc sndbit_mask   = $0F			; $0F for full volume output
+        defc sndbit_bit    = 3
+        defc sndbit_mask   = $0F			; $0F for full volume output
+	defc JOYSTICK_inkey = 1
 ENDIF
 
 IF FORmtx
@@ -252,31 +327,30 @@ IF FORpv2000
 ENDIF
 
 
+IF FORrx78
+	defc sndbit_port	= $FF
+	defc sndbit_bit    = 3
+	defc sndbit_mask   = $0F			; $0F for full volume output
+	defc JOYSTICK_inkey = 1
+ENDIF
+
+
+
+IF FORcoleco
+    defc sndbit_port	= $E0		; also valid for Coleco Adam and Pencil II
+    defc sndbit_bit    = 3
+    defc sndbit_mask   = $0F			; $0F for full volume output
+ENDIF
+
+
 ; ********************************************************
 ;   This last part refers to NOT YET supported hardware
 ; ********************************************************
 
-IF FORcoleco
-	defc sndbit_port	= $E0		; also valid for Coleco Adam and Pencil II
-    defc sndbit_bit    = 3
-    defc sndbit_mask   = $0F			; $0F for full volume output
-ENDIF
 
-IF FORpasopia
-	defc sndbit_port	= $3A		; Pasopia has also a second PSG on port $3B
-    defc sndbit_bit    = 3
-    defc sndbit_mask   = $0F			; $0F for full volume output
-ENDIF
 
-IF FORrx78
-	defc sndbit_port	= $FF
-    defc sndbit_bit    = 3
-    defc sndbit_mask   = $0F			; $0F for full volume output
-ENDIF
 
-IF FORsmc777
-	defc sndbit_port	= $53		; possibly valid also for Sony SMC 70
-    defc sndbit_bit    = 3
-    defc sndbit_mask   = $0F			; $0F for full volume output
-ENDIF
 
+IF !JOYSTICK_inkey
+	defc	JOYSTICK_inkey = 0
+ENDIF

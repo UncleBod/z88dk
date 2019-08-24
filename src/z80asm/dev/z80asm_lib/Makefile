@@ -4,13 +4,13 @@
 # Build and test z80asm-*.lib
 #
 # Copyright (C) Gunther Strube, InterLogic 1993-99
-# Copyright (C) Paulo Custodio, 2011-2017
+# Copyright (C) Paulo Custodio, 2011-2019
 # License: http://www.perlfoundation.org/artistic_license_2_0
 #------------------------------------------------------------------------------
 PROJ		:= z80asm
 
 INSTALL 	?= install
-Z80ASM		?= ../../$(PROJ)
+Z80ASM_EXE	?= ../../$(PROJ)
 SRC			:= $(filter-out test.asm,$(wildcard *.asm))
 
 #------------------------------------------------------------------------------
@@ -20,7 +20,7 @@ define MAKE_LIB
 all: $(PROJ)-$(strip $(1)).lib
 
 $(PROJ)-$(strip $(1)).lib: $(PROJ)_lib.lst $(SRC) Makefile ../../zobjfile.h
-	$(Z80ASM) -x$(PROJ)-$(strip $(1)).lib $(2) @$(PROJ)_lib.lst
+	$(Z80ASM_EXE) -x$(PROJ)-$(strip $(1)).lib $(2) @$(PROJ)_lib.lst
 
 clean::
 	$(RM) $(PROJ)-$(strip $(1)).lib
@@ -32,16 +32,20 @@ endef
 #------------------------------------------------------------------------------
 # Call for all variants
 #------------------------------------------------------------------------------
-$(eval $(call MAKE_LIB,	z80-,			--cpu=z80				))
-$(eval $(call MAKE_LIB,	z80-ixiy,		--cpu=z80 		--IXIY	))
-$(eval $(call MAKE_LIB,	z80_zxn-,		--cpu=z80-zxn			))
-$(eval $(call MAKE_LIB,	z80_zxn-ixiy,	--cpu=z80-zxn 	--IXIY	))
-$(eval $(call MAKE_LIB,	z180-,			--cpu=z180				))
-$(eval $(call MAKE_LIB,	z180-ixiy,		--cpu=z180 		--IXIY	))
-$(eval $(call MAKE_LIB,	r2k-,			--cpu=r2k				))
-$(eval $(call MAKE_LIB,	r2k-ixiy,		--cpu=r2k 		--IXIY	))
-$(eval $(call MAKE_LIB,	r3k-,			--cpu=r3k				))
-$(eval $(call MAKE_LIB,	r3k-ixiy,		--cpu=r3k 		--IXIY	))
+$(eval $(call MAKE_LIB,	8080-,			-m8080 				))
+$(eval $(call MAKE_LIB,	8080-ixiy,		-m8080 		--IXIY	))
+$(eval $(call MAKE_LIB,	8085-,			-m8085 				))
+$(eval $(call MAKE_LIB,	8085-ixiy,		-m8085 		--IXIY	))
+$(eval $(call MAKE_LIB,	z80-,			-mz80				))
+$(eval $(call MAKE_LIB,	z80-ixiy,		-mz80 		--IXIY	))
+$(eval $(call MAKE_LIB,	z80n-,			-mz80n				))
+$(eval $(call MAKE_LIB,	z80n-ixiy,		-mz80n 		--IXIY	))
+$(eval $(call MAKE_LIB,	z180-,			-mz180				))
+$(eval $(call MAKE_LIB,	z180-ixiy,		-mz180 		--IXIY	))
+$(eval $(call MAKE_LIB,	r2k-,			-mr2k				))
+$(eval $(call MAKE_LIB,	r2k-ixiy,		-mr2k 		--IXIY	))
+$(eval $(call MAKE_LIB,	r3k-,			-mr3k				))
+$(eval $(call MAKE_LIB,	r3k-ixiy,		-mr3k 		--IXIY	))
 
 $(PROJ)_lib.lst: $(SRC)
 	$(RM) $(PROJ)_lib.lst
